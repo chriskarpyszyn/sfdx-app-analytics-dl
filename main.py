@@ -2,7 +2,7 @@ import os
 from simple_salesforce import Salesforce
 from dotenv import load_dotenv
 from pathlib import Path
-
+import time
 
 # todo move to config file
 env_path = Path('.') / '.env'
@@ -32,6 +32,16 @@ def main():
     id_of_analytics_record = app_analytics_response.get('id')
 
     # wait, get record w/ aws link
+    # todo refactor into method
+    app_data = sf_instance.AppAnalyticsQueryRequest.get(id_of_analytics_record)
+    request_state = app_data.get('RequestState')
+    while request_state == 'New' or request_state == 'Pending':
+        print(request_state)
+        print('waiting')
+        time.sleep(5)
+
+    csv_url = app_data.get('DownloadUrl')
+    print(csv_url)
 
     # save csv from aws
 
