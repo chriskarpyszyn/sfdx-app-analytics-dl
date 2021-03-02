@@ -13,14 +13,23 @@ sfdc_token = os.getenv('SFDC_TOKEN')
 
 
 def main():
-    print('hi mom')
     # login to salesforce
-    sf_instance = Salesforce(username=sfdc_username, password=sfdc_password, security_token=sfdc_token)
+    sf_instance = Salesforce(username=sfdc_username, password=sfdc_password, security_token=sfdc_token, version=50.0)
 
     org_id_string = get_org_ids_string(sf_instance)
-    print(org_id_string)
 
     # create app analytics query request
+    # todo refactor into method
+    # todo parameterize create request
+    app_analytics_response = sf_instance.AppAnalyticsQueryRequest.create({
+        'DataType': 'PackageUsageLog',
+        'StartTime': '2021-03-01T00:00:00',
+        'EndTime': '2021-03-01T23:59:59',
+        'PackageIds': '033',
+        'OrganizationIds': '00D'
+    })
+    # todo check if successful
+    id_of_analytics_record = app_analytics_response.get('id')
 
     # wait, get record w/ aws link
 
