@@ -10,6 +10,7 @@ load_dotenv(dotenv_path=env_path)
 sfdc_username = os.getenv('SFDC_USER_NAME')
 sfdc_password = os.getenv('SFDC_PASSWORD')
 sfdc_token = os.getenv('SFDC_TOKEN')
+sfdc_package_ids = os.getenv('SFDC_PACKAGE_IDS')
 
 
 def main():
@@ -17,19 +18,7 @@ def main():
     sf_instance = Salesforce(username=sfdc_username, password=sfdc_password, security_token=sfdc_token, version=50.0)
 
     org_id_string = get_org_ids_string(sf_instance)
-
-    # create app analytics query request
-    # todo refactor into method
-    # todo parameterize create request
-    app_analytics_response = sf_instance.AppAnalyticsQueryRequest.create({
-        'DataType': 'PackageUsageLog',
-        'StartTime': '2021-03-01T00:00:00',
-        'EndTime': '2021-03-01T23:59:59',
-        'PackageIds': '033',
-        'OrganizationIds': '00D'
-    })
-    # todo check if successful
-    id_of_analytics_record = app_analytics_response.get('id')
+    id_of_analytics_record = create_app_analytic_record(sf_instance, sfdc_package_ids, org_id_string)
 
     # wait, get record w/ aws link
     # todo refactor into method
@@ -44,6 +33,27 @@ def main():
     print(csv_url)
 
     # save csv from aws
+
+
+def create_app_analytic_record(sf_instance, packageIds, organizationIds):
+    """
+    Create a Package Usage Log App Analytics Query Request for the previous day
+    :param sf_instance
+    :param packageIds:
+    :param organizationIds:
+    :return: the id of the successfully created record
+    """
+
+    app_analytics_response = sf_instance.AppAnalyticsQueryRequest.create({
+        'DataType': 'PackageUsageLog',
+        'StartTime': '2021-03-01T00:00:00',
+        'EndTime': '2021-03-01T23:59:59',
+        'PackageIds': packageIds,
+        'OrganizationIds': organizationIds
+    })
+
+    # todo check if successful
+    return app_analytics_response.get('id')
 
 
 def get_org_ids_string(sf_instance):
