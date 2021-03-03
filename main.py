@@ -39,18 +39,19 @@ def main():
         # list_of_org_id_strings[index_of_list].append(list_of_org_ids[i])
         list_of_org_id_strings[index_of_list] += [list_of_org_ids[i]]
 
-    # create the app analytics record and get the id
-    id_of_analytics_record = create_app_analytic_record(sf_instance, sfdc_package_ids, list_of_org_id_strings[0], yesterday_string)
+    for i in range(0, len(list_of_org_id_strings)):
+        # create the app analytics record and get the id
+        id_of_analytics_record = create_app_analytic_record(sf_instance, sfdc_package_ids, list_of_org_id_strings[i], yesterday_string)
 
-    # wait, get record w/ aws link
-    csv_url = get_csv_url(sf_instance, id_of_analytics_record)
+        # wait, get record w/ aws link
+        csv_url = get_csv_url(sf_instance, id_of_analytics_record)
 
-    # save csv from aws
-    data_frame = pandas.read_csv(csv_url)
+        # save csv from aws
+        data_frame = pandas.read_csv(csv_url)
 
-    if not os.path.exists(output_path):
-        os.mkdir(output_path)
-    data_frame.to_csv(f'{output_path}/{yesterday_string}_platform_analytics_[i].csv', index=False)
+        if not os.path.exists(output_path):
+            os.mkdir(output_path)
+        data_frame.to_csv(f'{output_path}/{yesterday_string}_platform_analytics_{i}.csv', index=False)
 
 
 def get_csv_url(sf_instance, app_analytics_id):
