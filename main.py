@@ -3,6 +3,7 @@ from simple_salesforce import Salesforce
 from dotenv import load_dotenv
 from pathlib import Path
 import time
+import pandas
 
 # todo move to config file
 env_path = Path('.') / '.env'
@@ -39,9 +40,10 @@ def main():
 
     # wait, get record w/ aws link
     csv_url = get_csv_url(sf_instance, id_of_analytics_record)
-    print(csv_url)
 
     # save csv from aws
+    data_frame = pandas.read_csv(csv_url)
+    data_frame.to_csv('[date]_platform_analytics_[i].csv', index=False)
 
 
 def get_csv_url(sf_instance, app_analytics_id):
