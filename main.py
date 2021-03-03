@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 from pathlib import Path
 import time
 import pandas
+from datetime import datetime, timedelta
 
 # todo move to config file
 env_path = Path('.') / '.env'
@@ -15,6 +16,9 @@ sfdc_package_ids = os.getenv('SFDC_PACKAGE_IDS')
 
 
 def main():
+    yesterday = datetime.now() - timedelta(1)
+    yesterday_string = datetime.strftime(yesterday, '%Y-%m-%d')
+
     # login to salesforce
     sf_instance = Salesforce(username=sfdc_username, password=sfdc_password, security_token=sfdc_token, version=50.0)
 
@@ -36,14 +40,14 @@ def main():
     print(list_of_org_id_strings)
 
     # create the app analytics record and get the id
-    id_of_analytics_record = create_app_analytic_record(sf_instance, sfdc_package_ids, list_of_org_id_strings[0])
+    id_of_analytics_record = create_app_analytic_record(sf_instance, sfdc_package_ids, list_of_org_id_strings[0], yesterday_string)
 
     # wait, get record w/ aws link
     csv_url = get_csv_url(sf_instance, id_of_analytics_record)
 
     # save csv from aws
     data_frame = pandas.read_csv(csv_url)
-    data_frame.to_csv('[date]_platform_analytics_[i].csv', index=False)
+    data_frame.to_csv(f'{yesterday_string}_platform_analytics_[i].csv', index=False)
 
 
 def get_csv_url(sf_instance, app_analytics_id):
@@ -56,7 +60,6 @@ def get_csv_url(sf_instance, app_analytics_id):
     request_state = get_request_state(sf_instance, app_analytics_id)
     while request_state == 'New' or request_state == 'Pending':
         print(request_state)
-        print('waiting')
         time.sleep(5)
         request_state = get_request_state(sf_instance, app_analytics_id)
 
@@ -74,9 +77,10 @@ def get_download_url(sf_instance, record_id):
     return aaqr_record.get('DownloadUrl')
 
 
-def create_app_analytic_record(sf_instance, package_ids, organization_ids):
+def create_app_analytic_record(sf_instance, package_ids, organization_ids, date_string):
     """
     Create a Package Usage Log App Analytics Query Request for the previous day
+    :param date_string:
     :param sf_instance
     :param package_ids:
     :param organization_ids:
@@ -88,8 +92,8 @@ def create_app_analytic_record(sf_instance, package_ids, organization_ids):
     # todo set date string to yesterday
     app_analytics_response = sf_instance.AppAnalyticsQueryRequest.create({
         'DataType': 'PackageUsageLog',
-        'StartTime': '2021-03-01T00:00:00',
-        'EndTime': '2021-03-01T23:59:59',
+        'StartTime': f'{date_string}T00:00:00',
+        'EndTime': f'{date_string}T23:59:59',
         'PackageIds': package_ids,
         'OrganizationIds': comma_delimited_string
     })
