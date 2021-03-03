@@ -89,7 +89,6 @@ def create_app_analytic_record(sf_instance, package_ids, organization_ids, date_
 
     comma_delimited_string = ','.join(str(s) for s in organization_ids)
 
-    # todo set date string to yesterday
     app_analytics_response = sf_instance.AppAnalyticsQueryRequest.create({
         'DataType': 'PackageUsageLog',
         'StartTime': f'{date_string}T00:00:00',
@@ -109,7 +108,6 @@ def get_org_ids_string(sf_instance):
     :return: comma delimited string of org ids
     """
     # this where condition is specific to my use case.
-    # todo extract the hardcoded variable
     where_condition = "WHERE sfLma__Package_Version__r.Name LIKE 'v%1.%'"
     data = sf_instance.query("SELECT sfLma__Subscriber_Org_ID__c FROM sfLma__License__c " + where_condition)
 
