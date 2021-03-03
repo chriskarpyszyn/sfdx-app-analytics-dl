@@ -51,15 +51,25 @@ def get_csv_url(sf_instance, app_analytics_id):
     :param app_analytics_id:
     :return:
     """
-    aaqr_record = sf_instance.AppAnalyticsQueryRequest.get(app_analytics_id)
-    request_state = aaqr_record.get('RequestState')
+    request_state = get_request_state(sf_instance, app_analytics_id)
     while request_state == 'New' or request_state == 'Pending':
         print(request_state)
         print('waiting')
         time.sleep(5)
+        request_state = get_request_state(sf_instance, app_analytics_id)
 
-    csv_url = aaqr_record.get('DownloadUrl')
+    csv_url = get_download_url(sf_instance, app_analytics_id)
     return csv_url
+
+
+def get_request_state(sf_instance, record_id):
+    aaqr_record = sf_instance.AppAnalyticsQueryRequest.get(record_id)
+    return aaqr_record.get('RequestState')
+
+
+def get_download_url(sf_instance, record_id):
+    aaqr_record = sf_instance.AppAnalyticsQueryRequest.get(record_id)
+    return aaqr_record.get('DownloadUrl')
 
 
 def create_app_analytic_record(sf_instance, package_ids, organization_ids):
