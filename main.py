@@ -17,7 +17,7 @@ output_path = os.getenv('OUTPUT_PATH')
 
 
 def main():
-    yesterday = datetime.now() - timedelta(1)
+    yesterday = datetime.now() - timedelta(2)
     yesterday_string = datetime.strftime(yesterday, '%Y-%m-%d')
 
     # login to salesforce
@@ -50,7 +50,8 @@ def main():
         # save csv from aws
         if not os.path.exists(output_path):
             os.mkdir(output_path)
-        urllib.request.urlretrieve(csv_url, f'{output_path}/{yesterday_string}_platform_analytics_{i}.csv')
+        if not csv_url == '':
+            urllib.request.urlretrieve(csv_url, f'{output_path}/{yesterday_string}_platform_analytics_{i}.csv')
 
 
 def get_csv_url(sf_instance, app_analytics_id):
@@ -66,7 +67,9 @@ def get_csv_url(sf_instance, app_analytics_id):
         time.sleep(5)
         request_state = get_request_state(sf_instance, app_analytics_id)
 
-    csv_url = get_download_url(sf_instance, app_analytics_id)
+    csv_url = ''
+    if not request_state == 'No Data':
+        csv_url = get_download_url(sf_instance, app_analytics_id)
     return csv_url
 
 
