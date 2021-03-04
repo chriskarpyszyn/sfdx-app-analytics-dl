@@ -3,8 +3,8 @@ from simple_salesforce import Salesforce
 from dotenv import load_dotenv
 from pathlib import Path
 import time
-import pandas
 from datetime import datetime, timedelta
+import urllib.request
 
 # todo move to config file
 env_path = Path('.') / '.env'
@@ -17,7 +17,7 @@ output_path = os.getenv('OUTPUT_PATH')
 
 
 def main():
-    yesterday = datetime.now() - timedelta(1)
+    yesterday = datetime.now() - timedelta(2)
     yesterday_string = datetime.strftime(yesterday, '%Y-%m-%d')
 
     # login to salesforce
@@ -30,6 +30,7 @@ def main():
     list_of_org_ids = all_org_ids_string.split(",")
 
     # create a list of lists with 15 ids.
+    # todo extract to method, remove hardcoded 15
     list_of_org_id_strings = []
     index_of_list = -1
     for i in range(0, len(list_of_org_ids)):
@@ -47,11 +48,10 @@ def main():
         csv_url = get_csv_url(sf_instance, id_of_analytics_record)
 
         # save csv from aws
-        data_frame = pandas.read_csv(csv_url)
-
         if not os.path.exists(output_path):
             os.mkdir(output_path)
-        data_frame.to_csv(f'{output_path}/{yesterday_string}_platform_analytics_{i}.csv', index=False)
+        if not csv_url == '':
+            urllib.request.urlretrieve(csv_url, f'{output_path}/{yesterday_string}_platform_analytics_{i}.csv')
 
 
 def get_csv_url(sf_instance, app_analytics_id):
@@ -67,7 +67,9 @@ def get_csv_url(sf_instance, app_analytics_id):
         time.sleep(5)
         request_state = get_request_state(sf_instance, app_analytics_id)
 
-    csv_url = get_download_url(sf_instance, app_analytics_id)
+    csv_url = ''
+    if not request_state == 'No Data':
+        csv_url = get_download_url(sf_instance, app_analytics_id)
     return csv_url
 
 

@@ -4,13 +4,8 @@ cffi==1.14.5
 chardet==4.0.0
 cryptography==3.4.6
 idna==2.10
-numpy==1.20.1
-pandas==1.2.3
 pycparser==2.20
-python-dateutil==2.8.1
 python-dotenv==0.15.0
-pytz==2021.1
 requests==2.25.1
 simple-salesforce==1.10.1
-six==1.15.0
 urllib3==1.26.3
