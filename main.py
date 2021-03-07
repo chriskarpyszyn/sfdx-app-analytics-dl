@@ -17,7 +17,7 @@ output_path = os.getenv('OUTPUT_PATH')
 
 
 def main():
-    yesterday = datetime.now() - timedelta(2)
+    yesterday = datetime.now() - timedelta(1)
     yesterday_string = datetime.strftime(yesterday, '%Y-%m-%d')
 
     # login to salesforce
