@@ -50,8 +50,14 @@ def main():
         # save csv from aws
         if not os.path.exists(output_path):
             os.mkdir(output_path)
-        if not csv_url == '':
+        if check_url_exists(csv_url):
             urllib.request.urlretrieve(csv_url, f'{output_path}/{yesterday_string}_platform_analytics_{i}.csv')
+
+
+def check_url_exists(csv_url):
+    if csv_url != '' or csv_url is not None:
+        return True
+    return False
 
 
 def get_csv_url(sf_instance, app_analytics_id):
@@ -127,4 +133,5 @@ def get_org_ids_string(sf_instance):
     return org_ids_string
 
 
-main()
+if __name__ == '__main__':
+    main()
