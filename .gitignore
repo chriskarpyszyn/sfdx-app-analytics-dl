@@ -4,3 +4,4 @@
 .env
 /venv
 *.iml
+/output
