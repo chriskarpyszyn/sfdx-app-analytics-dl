@@ -56,7 +56,7 @@ def main(date_arg):
 
 
 def check_url_exists(csv_url):
-    if csv_url != '' or csv_url is not None:
+    if csv_url != '' and csv_url is not None:
         return True
     return False
 
@@ -91,7 +91,7 @@ def get_csv_url(sf_instance, app_analytics_id):
         time.sleep(5)
         request_state = get_request_state(sf_instance, app_analytics_id)
 
-    csv_url = ''
+    csv_url = None
     if not request_state == 'No Data':
         csv_url = get_download_url(sf_instance, app_analytics_id)
     return csv_url
@@ -152,4 +152,4 @@ def get_org_ids_string(sf_instance):
 
 
 if __name__ == '__main__':
-    main(sys.argv[1:])
+    main(sys.argv[1])
