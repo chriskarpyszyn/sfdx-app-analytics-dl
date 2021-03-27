@@ -19,7 +19,7 @@ output_path = os.getenv('OUTPUT_PATH')
 
 
 def main(date_arg):
-    log_date_string = set_log_date(date_arg)
+    log_date_strings = set_log_date(date_arg)
 
     # login to salesforce
     sf_instance = Salesforce(username=sfdc_username, password=sfdc_password, security_token=sfdc_token, version=50.0)
@@ -41,18 +41,19 @@ def main(date_arg):
         # list_of_org_id_strings[index_of_list].append(list_of_org_ids[i])
         list_of_org_id_strings[index_of_list] += [list_of_org_ids[i]]
 
-    for i in range(0, len(list_of_org_id_strings)):
-        # create the app analytics record and get the id
-        id_of_analytics_record = create_app_analytic_record(sf_instance, sfdc_package_ids, list_of_org_id_strings[i], log_date_string)
+    for log_date_string in log_date_strings:
+        for i in range(0, len(list_of_org_id_strings)):
+            # create the app analytics record and get the id
+            id_of_analytics_record = create_app_analytic_record(sf_instance, sfdc_package_ids, list_of_org_id_strings[i], log_date_string)
 
-        # wait, get record w/ aws link
-        csv_url = get_csv_url(sf_instance, id_of_analytics_record)
+            # wait, get record w/ aws link
+            csv_url = get_csv_url(sf_instance, id_of_analytics_record)
 
-        # save csv from aws
-        if not os.path.exists(output_path):
-            os.mkdir(output_path)
-        if check_url_exists(csv_url):
-            urllib.request.urlretrieve(csv_url, f'{output_path}/{log_date_string}_platform_analytics_{i}.csv')
+            # save csv from aws
+            if not os.path.exists(output_path):
+                os.mkdir(output_path)
+            if check_url_exists(csv_url):
+                urllib.request.urlretrieve(csv_url, f'{output_path}/{log_date_string}_platform_analytics_{i}.csv')
 
 
 def check_url_exists(csv_url):
@@ -67,15 +68,20 @@ def set_log_date(date_arg):
     :param date_arg:
     :return:
     """
+    date_list = []
     if date_arg is None or date_arg == '':
         temp_date = datetime.now() - timedelta(1)
-        return datetime.strftime(temp_date, '%Y-%m-%d')
+        date_list.append(datetime.strftime(temp_date, '%Y-%m-%d'))
+    elif '.txt' in date_arg:
+        with open('input/'+date_arg) as f:
+            date_list = f.read().splitlines()
     else:
         try:
             datetime.strptime(date_arg, '%Y-%m-%d')
         except ValueError:
             raise ValueError('Wrong Date Arg Format')
-        return date_arg
+        date_list.append(date_arg)
+    return date_list
 
 
 def get_csv_url(sf_instance, app_analytics_id):
