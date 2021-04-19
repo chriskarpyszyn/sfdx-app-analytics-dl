@@ -7,7 +7,6 @@ from datetime import datetime, timedelta
 import urllib.request
 import sys
 
-
 # todo move to config file
 env_path = Path('.') / '.env'
 load_dotenv(dotenv_path=env_path)
@@ -73,7 +72,7 @@ def set_log_date(date_arg):
         temp_date = datetime.now() - timedelta(1)
         date_list.append(datetime.strftime(temp_date, '%Y-%m-%d'))
     elif '.txt' in date_arg:
-        with open('input/'+date_arg) as f:
+        with open('input/' + date_arg) as f:
             date_list = f.read().splitlines()
     else:
         try:
@@ -158,4 +157,6 @@ def get_org_ids_string(sf_instance):
 
 
 if __name__ == '__main__':
-    main(sys.argv[1])
+    if len(sys.argv) < 1:
+        main(sys.argv[1])
+    main('')
